@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Here is the many to many relation for MongoDB from our docs 
+// https://www.prisma.io/docs/concepts/components/prisma-schema/relations/many-to-many-relations#mongodb
+// - relation fields on both sides, that each have a @relation attribute, with mandatory fields and references arguments
+// - a scalar list of referenced IDs on each side, with a type that matches the ID field on the other side
+
+// 
+// Tests are passing without @map("categoryIDsAtMap") & @map("postIDsAtMap")
+// Tests are failing with @map 
+// When @map is on the scalar list of referenced IDs, here categoryIDs and postIDs
+// 
+
+model PostManyToMany {
+  id          String               @id @map("_id")
+  categoryIDs String[]             @map("categoryIDsAtMap")
+  categories  CategoryManyToMany[] @relation(fields: [categoryIDs], references: [id])
+  published   Boolean?
+}
+
+model CategoryManyToMany {
+  id        String           @id @map("_id")
+  postIDs   String[]         @map("postIDsAtMap")
+  posts     PostManyToMany[] @relation(fields: [postIDs], references: [id])
+  published Boolean?
+}
